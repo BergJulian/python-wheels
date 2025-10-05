@@ -42,11 +42,12 @@ run qmake NetAnim.pro
 run make -j $(nproc)
 
 section ---------------- ns-3 ----------------
+workdir "/opt/ns-3"
+run ./build.py -- install --destdir=/ns-3-build
+
 workdir "/opt/ns-3/ns-$NS3_VERSION"
 run ./waf configure
 
-workdir "/opt/ns-3"
-run ./build.py -- install --destdir=/ns-3-build
 run cp netanim-*/NetAnim /ns-3-build/usr/local/bin
 
 section ---------------- python wheel ----------------

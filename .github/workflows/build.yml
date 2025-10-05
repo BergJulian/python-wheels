@@ -107,6 +107,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-info
+          path: release-info
 
       - name: Publish release
         uses: actions/github-script@0.9.0

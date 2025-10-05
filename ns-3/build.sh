@@ -22,10 +22,10 @@ run apt-get install -y --no-install-recommends \
 	zip \
 	&& true
 
-export NS3_VERSION=3.33
+export NS3_VERSION=3.45
 
-# 3.33
-ns3_download_sha1=d20b5ca146975f202655c1940db57f53c9f574a1
+# 3.45
+ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc
 
 section ---------------- download ----------------
 workdir /opt/ns-3

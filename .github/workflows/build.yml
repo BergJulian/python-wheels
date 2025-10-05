@@ -32,7 +32,7 @@ jobs:
             }));
 
       - name: Upload release-info
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/master'
         with:
           name: release-info
@@ -49,7 +49,6 @@ jobs:
       matrix:
         wheel:
           - ns-3
-          - traci
       fail-fast: false
 
     steps:
@@ -60,7 +59,7 @@ jobs:
         run: exec ./github-action-build.sh ${{ matrix.wheel }}/build.sh
 
       - name: Download release-info
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         if: github.ref == 'refs/heads/master'
         with:
           name: release-info
@@ -104,7 +103,7 @@ jobs:
 
     steps:
       - name: Download release-info
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: release-info
 

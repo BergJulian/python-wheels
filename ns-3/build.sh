@@ -47,7 +47,7 @@ workdir "/opt/ns-3/ns-$NS3_VERSION"
 run mkdir -p build
 workdir "/opt/ns-3/ns-$NS3_VERSION/build"
 run cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
-run make -j$(nproc)
+run make -j$(nproc) 2>&1 | tee build.log
 run make install DESTDIR=/ns-3-build
 
 workdir "/opt/ns-3"

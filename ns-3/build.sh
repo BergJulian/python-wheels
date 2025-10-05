@@ -51,7 +51,6 @@ run make -j$(nproc)
 run make install DESTDIR=/ns-3-build
 
 workdir "/opt/ns-3"
-run ./build.py -- install --destdir=/ns-3-build
 run cp netanim-*/NetAnim /ns-3-build/usr/local/bin
 
 section ---------------- python wheel ----------------

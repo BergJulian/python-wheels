@@ -38,6 +38,7 @@ section ---------------- NetAnim ----------------
 workdir /opt
 run git clone https://gitlab.com/nsnam/netanim.git
 workdir netanim
+run git checkout 3.109
 run qmake NetAnim.pro
 run make -j $(nproc)
 

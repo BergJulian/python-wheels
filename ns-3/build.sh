@@ -46,8 +46,9 @@ section ---------------- ns-3 ----------------
 workdir "/opt/ns-3/ns-$NS3_VERSION"
 run mkdir -p build
 workdir "/opt/ns-3/ns-$NS3_VERSION/build"
+run make clean
 run cmake ..
-run make -j $(nproc)
+make -j$(nproc) 2>&1 | tee build.log
 
 workdir "/opt/ns-3"
 run ./build.py -- install --destdir=/ns-3-build

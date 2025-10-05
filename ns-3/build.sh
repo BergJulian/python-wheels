@@ -44,8 +44,10 @@ run make -j $(nproc)
 
 section ---------------- ns-3 ----------------
 workdir "/opt/ns-3/ns-$NS3_VERSION"
-run ls -l /opt/ns-3/ns-$NS3_VERSION/
-run ./waf configure
+run mkdir -p build
+workdir "/opt/ns-3/ns-$NS3_VERSION/build"
+run cmake ..
+run make -j $(nproc)
 
 workdir "/opt/ns-3"
 run ./build.py -- install --destdir=/ns-3-build

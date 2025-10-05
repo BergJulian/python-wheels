@@ -31,7 +31,7 @@ section ---------------- download ----------------
 workdir /opt/ns-3
 run curl -L -o ../ns-3.tar.bz2 https://www.nsnam.org/releases/ns-allinone-$NS3_VERSION.tar.bz2
 runsh "echo '${ns3_download_sha1} ../ns-3.tar.bz2' | sha1sum -c"
-run tar xj -f ../ns-3.tar.bz2
+run tar --strip-components=1 -xjf ../ns-3.tar.bz2
 
 section ---------------- NetAnim ----------------
 workdir /opt

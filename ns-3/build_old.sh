@@ -22,29 +22,32 @@ run apt-get install -y --no-install-recommends \
 	zip \
 	&& true
 
-export NS3_VERSION=3.33
+export NS3_VERSION=3.45
 
-# 3.33
-ns3_download_sha1=d20b5ca146975f202655c1940db57f53c9f574a1
+# 3.45
+ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc
 
 section ---------------- download ----------------
 workdir /opt/ns-3
 run curl -L -o ../ns-3.tar.bz2 https://www.nsnam.org/releases/ns-allinone-$NS3_VERSION.tar.bz2
 runsh "echo '${ns3_download_sha1} ../ns-3.tar.bz2' | sha1sum -c"
-run tar xj --strip-components 1 -f ../ns-3.tar.bz2
-
+run tar --strip-components=1 -xjf ../ns-3.tar.bz2
 
 section ---------------- NetAnim ----------------
-workdir netanim-*
+workdir /opt
+run git clone https://gitlab.com/nsnam/netanim.git
+workdir netanim
+run git checkout netanim-3.109
 run qmake NetAnim.pro
 run make -j $(nproc)
 
 section ---------------- ns-3 ----------------
+workdir "/opt/ns-3"
+run ./build.py -- install --destdir=/ns-3-build
+
 workdir "/opt/ns-3/ns-$NS3_VERSION"
 run ./waf configure
 
-workdir "/opt/ns-3"
-run ./build.py -- install --destdir=/ns-3-build
 run cp netanim-*/NetAnim /ns-3-build/usr/local/bin
 
 section ---------------- python wheel ----------------

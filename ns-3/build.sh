@@ -23,7 +23,7 @@ run apt-get install -y --no-install-recommends \
 	&& true
 
 export NS3_VERSION=3.45
-export NETANIM_VERSION=3.110
+export NETANIM_VERSION=3.109
 
 # 3.45
 ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc

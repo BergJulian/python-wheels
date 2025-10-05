@@ -27,15 +27,19 @@ export NS3_VERSION=3.45
 # 3.45
 ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc
 
-section ---------------- download ----------------
+section ---------------- download ns-3 ----------------
 workdir /opt/ns-3
 run curl -L -o ../ns-3.tar.bz2 https://www.nsnam.org/releases/ns-allinone-$NS3_VERSION.tar.bz2
 runsh "echo '${ns3_download_sha1} ../ns-3.tar.bz2' | sha1sum -c"
 run tar xj --strip-components 1 -f ../ns-3.tar.bz2
 
+section ---------------- download NetAnim ----------------
+env NETANIM_VERSION=3.110
+run curl -L -o netanim.tar.gz https://github.com/nsnam/netanim/archive/refs/tags/netanim-${NETANIM_VERSION}.tar.gz
+run tar xzf netanim.tar.gz
 
 section ---------------- NetAnim ----------------
-workdir netanim-*
+workdir netanim-netanim-${NETANIM_VERSION}
 run qmake NetAnim.pro
 run make -j $(nproc)
 

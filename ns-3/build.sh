@@ -35,7 +35,9 @@ run tar xj --strip-components 1 -f ../ns-3.tar.bz2
 
 
 section ---------------- NetAnim ----------------
-workdir netanim-*
+workdir /opt
+run git clone https://gitlab.com/nsnam/netanim.git
+workdir netanim
 run qmake NetAnim.pro
 run make -j $(nproc)
 

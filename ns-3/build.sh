@@ -44,6 +44,7 @@ run make -j $(nproc)
 
 section ---------------- ns-3 ----------------
 workdir "/opt/ns-3/ns-$NS3_VERSION"
+run ls -l /opt/ns-3/ns-$NS3_VERSION/
 run ./waf configure
 
 workdir "/opt/ns-3"

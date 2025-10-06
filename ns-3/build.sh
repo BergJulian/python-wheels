@@ -21,12 +21,12 @@ run apt-get install -y --no-install-recommends \
 	python3-wheel \
 	qtbase5-dev \
 	zip \
-	&& pip install --upgrade cmake
+	&& true
 
-export NS3_VERSION=3.46
+export NS3_VERSION=3.45
 
-# 3.46
-ns3_download_sha1=15f7e24e0e63ad64c0a65cef2724a71ef9443447
+# 3.45
+ns3_download_sha1=9b0bc3c3a35ec17e9afabbff86e3c1eef1d5fc91
 
 section ---------------- download ----------------
 workdir /opt

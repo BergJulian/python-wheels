@@ -12,6 +12,7 @@ run apt-get install -y --no-install-recommends \
 	libclang-dev \
 	llvm-dev \
 	make \
+	ninja-build \
 	patch \
 	patchelf \
 	python3-dev \
@@ -23,63 +24,47 @@ run apt-get install -y --no-install-recommends \
 	&& true
 
 export NS3_VERSION=3.45
-export NETANIM_VERSION=3.109
 
 # 3.45
-ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc
+ns3_download_sha1=___
 
-section ---------------- download ns-3 ----------------
+section ---------------- download ----------------
+workdir /opt
+run curl -L -o ns-3.tar.bz2 https://www.nsnam.org/releases/ns-3.$NS3_VERSION.tar.bz2
+runsh "echo '${ns3_download_sha1} ns-3.tar.bz2' | sha1sum -c"
+run mkdir ns-3 && tar xjf ns-3.tar.bz2 --strip-components 1 -C ns-3
+
+section ---------------- build ns-3 ----------------
 workdir /opt/ns-3
-run curl -L -o ../ns-3.tar.bz2 https://www.nsnam.org/releases/ns-allinone-$NS3_VERSION.tar.bz2
-runsh "echo '${ns3_download_sha1} ../ns-3.tar.bz2' | sha1sum -c"
-run tar xj --strip-components 1 -f ../ns-3.tar.bz2
+run mkdir build
+workdir /opt/ns-3/build
+run cmake -G Ninja \
+    -DNS3_PYTHON_BINDINGS=ON \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/ns-3-install \
+    ..
+run ninja
+run ninja install
 
 section ---------------- NetAnim ----------------
-run git clone --depth 1 --branch netanim-${NETANIM_VERSION} https://gitlab.com/nsnam/netanim.git netanim
-
-workdir netanim
+workdir /opt
+run git clone https://gitlab.com/nsnam/netanim.git
+workdir /opt/netanim
 run qmake NetAnim.pro
 run make -j $(nproc)
-
-
-section ---------------- ns-3 ----------------
-workdir "/opt/ns-3/ns-$NS3_VERSION"
-run mkdir -p build
-workdir "/opt/ns-3/ns-$NS3_VERSION/build"
-run cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
-run make -j$(nproc) 2>&1 | tee build.log
-run make install DESTDIR=/ns-3-build
-
-workdir "/opt/ns-3"
-run cp netanim-*/NetAnim /ns-3-build/usr/local/bin
+run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
-run cp "$base/__init__.py" /ns-3-build/usr/local/lib/python3/dist-packages/ns/
-run cp -r "$base/ns" /opt/ns
+run mkdir -p /opt/ns
+run cp -r "$repo/ns-3/ns" /opt/ns/
+run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python3*/site-packages/ns/
 
 workdir /opt/ns
 run python3 setup.py bdist_wheel
 run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
 
-ns3_patch="patch/ns-$NS3_VERSION"
-
-run rm -r "$ns3_patch/ns/_/lib/python3"
-
-for f in "$ns3_patch"/ns/*.so; do
-	run patchelf --set-rpath '$ORIGIN/_/lib' "$f";
-done
-
-for f in "$ns3_patch"/ns/_/bin/*; do
-	run patchelf --set-rpath '$ORIGIN/../lib' "$f";
-	run chmod +x "$f";
-done
-
-for f in "$ns3_patch"/ns/_/lib/*.so; do
-	run patchelf --set-rpath '$ORIGIN' "$f";
-done
-
 run mkdir dist2
-run python3 -m wheel pack -d dist2 "$ns3_patch"
+run python3 -m wheel pack -d dist2 "patch/ns-$NS3_VERSION"
 
 asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
 run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"

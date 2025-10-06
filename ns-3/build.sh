@@ -42,7 +42,7 @@ run mkdir build
 workdir /opt/ns-3/build
 run cmake -G Ninja \
     -DNS3_PYTHON_BINDINGS=ON \
-    -DPYTHON_EXECUTABLE=/usr/bin/python3.10 \
+    -DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/ns-3-install \
     ..

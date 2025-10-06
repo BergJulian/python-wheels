@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from sys import platform
+from sys import platform, version_info
 from setuptools import setup
 from setuptools.command.install import install
 from distutils.command.build import build
@@ -10,7 +10,7 @@ from multiprocessing import cpu_count
 
 NS3_BUILD_PATH = '/ns-3-install'
 NS3_VERSION = os.environ['NS3_VERSION']
-PY_VER = f"python{sys.version_info.major}.{sys.version_info.minor}"
+PY_VER = f"python{version_info.major}.{version_info.minor}"
 
 class NS3Build(build):
   def run(self):

@@ -61,6 +61,7 @@ run cp NetAnim /ns-3-install/usr/local/bin/
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
 run cp -r "$repo/ns-3/ns" /opt/ns/
+run cp "$repo/ns-3/setup.py" /opt/ns/
 
 # Create correct Python site-packages directory and copy __init__.py
 PY_VER=$(python3 -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')

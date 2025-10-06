@@ -67,6 +67,7 @@ run cp "$repo/ns-3/setup.py" /opt/ns/
 PY_VER=$(python3 -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')
 run mkdir -p /ns-3-install/lib/$PY_VER/site-packages/ns
 run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/$PY_VER/site-packages/ns/
+run cp /opt/ns/ns/setup.py /opt/ns/
 
 workdir /opt/ns
 run python3 setup.py bdist_wheel

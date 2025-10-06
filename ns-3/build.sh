@@ -19,7 +19,7 @@ run apt-get install -y --no-install-recommends \
         patch \
         patchelf \
 	python3.10 \
-        python3.10-dev \
+        python3-dev \
 	python3.10-distutils \
         python3-pip \
         python3-setuptools \

@@ -48,7 +48,7 @@ run ninja install
 
 section ---------------- NetAnim ----------------
 workdir /opt
-run git clone -b netanim-3.110 https://gitlab.com/nsnam/netanim.git
+run git clone -b netanim-3.109 https://gitlab.com/nsnam/netanim.git
 workdir /opt/netanim
 run qmake NetAnim.pro
 run make -j $(nproc)

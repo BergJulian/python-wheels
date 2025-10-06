@@ -35,7 +35,7 @@ setup(
   maintainer_email='code@mgjm.de',
   license='GPLv2',
   url='https://www.nsnam.org',
-  long_description=read(f'/opt/ns-3/ns-{NS3_VERSION}/README.md'),
+  long_description=read(f'/opt/ns-3/README.md'),
   long_description_content_type='text/markdown',
   classifiers=[
     'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',

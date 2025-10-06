@@ -15,9 +15,9 @@ PY_VER = os.environ.get('NS3_PYTHON_VERSION', f"python{version_info.major}.{vers
 class NS3Build(build):
   def run(self):
     super().run()
-    self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/lib/{PY_VER}/site-packages/ns', self.build_lib + '/ns')
-    self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/lib', self.build_lib + '/ns/_/lib')
-    self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/bin', self.build_lib + '/ns/_/bin')
+    self.copy_tree(f'{NS3_BUILD_PATH}/lib/{PY_VER}/site-packages/ns', self.build_lib + '/ns')
+    self.copy_tree(f'{NS3_BUILD_PATH}/lib', self.build_lib + '/ns/_/lib')
+    self.copy_tree(f'{NS3_BUILD_PATH}/bin', self.build_lib + '/ns/_/bin')
 
 class NS3Install(install):
   def run(self):

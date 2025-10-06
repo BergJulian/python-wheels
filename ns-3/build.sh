@@ -2,6 +2,9 @@ repo="$PWD"
 base="$repo/ns-3"
 
 section ---------------- install ----------------
+export NS3_VERSION=3.45
+export NS3_PYTHON_VERSION=3.10
+
 run apt-get update
 run apt-get install -y --no-install-recommends \
         bzip2 \
@@ -15,9 +18,9 @@ run apt-get install -y --no-install-recommends \
         ninja-build \
         patch \
         patchelf \
-        python3.10 \
+	python3.10 \
         python3.10-dev \
-        python3.10-distutils \
+	python3.10-distutils \
         python3-pip \
         python3-setuptools \
         python3-wheel \
@@ -25,10 +28,8 @@ run apt-get install -y --no-install-recommends \
         zip \
         && true
 
-# ensure python3 points to python3.10
-run ln -sf /usr/bin/python3.10 /usr/bin/python3
 
-export NS3_VERSION=3.45
+# 3.45
 ns3_download_sha1=9b0bc3c3a35ec17e9afabbff86e3c1eef1d5fc91
 
 section ---------------- download ----------------
@@ -62,8 +63,6 @@ run cp NetAnim /ns-3-install/usr/local/bin/
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
 run cp -r "$repo/ns-3/ns" /opt/ns/
-
-# ensure Python 3.10 site-packages directory exists before copying
 run mkdir -p /ns-3-install/lib/python3.10/site-packages/ns
 run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python3.10/site-packages/ns/
 

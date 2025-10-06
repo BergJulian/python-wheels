@@ -61,13 +61,12 @@ run cp NetAnim /ns-3-install/usr/local/bin/
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
 run cp -r "$repo/ns-3/ns" /opt/ns/
-run cp "$repo/ns-3/setup.py" /opt/ns/
+run cp "$repo/ns-3/ns/setup.py" /opt/ns/
 
 # Create correct Python site-packages directory and copy __init__.py
 PY_VER=$(python3 -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}")')
 run mkdir -p /ns-3-install/lib/$PY_VER/site-packages/ns
 run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/$PY_VER/site-packages/ns/
-run cp /opt/ns/ns/setup.py /opt/ns/
 
 workdir /opt/ns
 run python3 setup.py bdist_wheel

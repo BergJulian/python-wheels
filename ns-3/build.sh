@@ -26,11 +26,11 @@ run apt-get install -y --no-install-recommends \
 export NS3_VERSION=3.45
 
 # 3.45
-ns3_download_sha1=___
+ns3_download_sha1=9b0bc3c3a35ec17e9afabbff86e3c1eef1d5fc91
 
 section ---------------- download ----------------
 workdir /opt
-run curl -L -o ns-3.tar.bz2 https://www.nsnam.org/releases/ns-3.$NS3_VERSION.tar.bz2
+run curl -L -o ns-3.tar.bz2 https://www.nsnam.org/releases/ns-$NS3_VERSION.tar.bz2
 runsh "echo '${ns3_download_sha1} ns-3.tar.bz2' | sha1sum -c"
 run mkdir ns-3 && tar xjf ns-3.tar.bz2 --strip-components 1 -C ns-3
 

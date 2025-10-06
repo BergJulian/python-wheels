@@ -4,28 +4,31 @@ base="$repo/ns-3"
 section ---------------- install ----------------
 run apt-get update
 run apt-get install -y --no-install-recommends \
-	bzip2 \
-	cmake \
-	curl \
-	g++ \
-	git \
-	libclang-dev \
-	llvm-dev \
-	make \
-	ninja-build \
-	patch \
-	patchelf \
-	python3-dev \
-	python3-pip \
-	python3-setuptools \
-	python3-wheel \
-	qtbase5-dev \
-	zip \
-	&& true
+        bzip2 \
+        cmake \
+        curl \
+        g++ \
+        git \
+        libclang-dev \
+        llvm-dev \
+        make \
+        ninja-build \
+        patch \
+        patchelf \
+        python3.10 \
+        python3.10-dev \
+        python3.10-distutils \
+        python3-pip \
+        python3-setuptools \
+        python3-wheel \
+        qtbase5-dev \
+        zip \
+        && true
+
+# ensure python3 points to python3.10
+run ln -sf /usr/bin/python3.10 /usr/bin/python3
 
 export NS3_VERSION=3.45
-
-# 3.45
 ns3_download_sha1=9b0bc3c3a35ec17e9afabbff86e3c1eef1d5fc91
 
 section ---------------- download ----------------
@@ -40,6 +43,7 @@ run mkdir build
 workdir /opt/ns-3/build
 run cmake -G Ninja \
     -DNS3_PYTHON_BINDINGS=ON \
+    -DPYTHON_EXECUTABLE=/usr/bin/python3.10 \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/ns-3-install \
     ..
@@ -55,11 +59,13 @@ run make -j $(nproc)
 run mkdir -p /ns-3-install/usr/local/bin
 run cp NetAnim /ns-3-install/usr/local/bin/
 
-
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
 run cp -r "$repo/ns-3/ns" /opt/ns/
-run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python3*/site-packages/ns/
+
+# ensure Python 3.10 site-packages directory exists before copying
+run mkdir -p /ns-3-install/lib/python3.10/site-packages/ns
+run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python3.10/site-packages/ns/
 
 workdir /opt/ns
 run python3 setup.py bdist_wheel

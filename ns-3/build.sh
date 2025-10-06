@@ -69,7 +69,8 @@ run mkdir -p /ns-3-install/lib/$PY_VER/site-packages/ns
 run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/$PY_VER/site-packages/ns/
 
 workdir /opt/ns
-run python3 setup.py bdist_wheel
+PY_PATH="/usr/bin/python${NS3_PYTHON_VERSION}"
+run $PY_PATH setup.py bdist_wheel
 run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
 
 run mkdir dist2

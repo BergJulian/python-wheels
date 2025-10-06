@@ -8,13 +8,14 @@ from distutils.command.build import build
 from subprocess import call
 from multiprocessing import cpu_count
 
-NS3_BUILD_PATH = '/ns-3-build'
+NS3_BUILD_PATH = '/ns-3-install'
 NS3_VERSION = os.environ['NS3_VERSION']
+PY_VER = f"python{sys.version_info.major}.{sys.version_info.minor}"
 
 class NS3Build(build):
   def run(self):
     super().run()
-    self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/lib/python3.9/site-packages/ns', self.build_lib + '/ns')
+    self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/lib/{PY_VER}/site-packages/ns', self.build_lib + '/ns')
     self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/lib', self.build_lib + '/ns/_/lib')
     self.copy_tree(f'{NS3_BUILD_PATH}/usr/local/bin', self.build_lib + '/ns/_/bin')
 

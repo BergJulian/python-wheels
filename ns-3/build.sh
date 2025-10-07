@@ -27,8 +27,8 @@ run apt-get install -y --no-install-recommends \
         && true
 
 
-# 3.45
-ns3_download_sha1=9b0bc3c3a35ec17e9afabbff86e3c1eef1d5fc91
+# 3.46
+ns3_download_sha1=15f7e24e0e63ad64c0a65cef2724a71ef9443447
 
 section ---------------- download ----------------
 workdir /opt

@@ -41,13 +41,12 @@ workdir /opt/ns-3
 run mkdir build
 workdir /opt/ns-3/build
 run cmake -G Ninja \
-    -DNS3_PYTHON_BINDINGS=ON \
-    -DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=/ns-3-install \
-    -DCMAKE_CXX_FLAGS="-Wno-nonnull -Wno-array-bounds -Wno-stringop-overflow -Wno-error" \
-    -DWARNING_AS_ERROR=OFF \
-    ..
+	-DCMAKE_CXX_COMPILER=/usr/bin/g++-11 \
+	-DNS3_PYTHON_BINDINGS=ON \
+	-DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_INSTALL_PREFIX=/ns-3-install \
+	..
 run ninja
 run ninja install
 

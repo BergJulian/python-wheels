@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: release
     container:
-      image: debian:11
+      image: debian:12
 
     strategy:
       matrix:

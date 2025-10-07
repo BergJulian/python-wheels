@@ -2,7 +2,7 @@ repo="$PWD"
 base="$repo/ns-3"
 
 section ---------------- install ----------------
-export NS3_VERSION=3.45
+export NS3_VERSION=3.46
 export NS3_PYTHON_VERSION=3.11
 
 run apt-get update

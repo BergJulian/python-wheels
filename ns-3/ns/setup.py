@@ -18,7 +18,6 @@ class NS3Build(build):
     super().run()
     self.copy_tree(f'{NS3_BUILD_PATH}/lib/{PY_VER}/site-packages/ns', self.build_lib + '/ns')
     self.copy_tree(f'{NS3_BUILD_PATH}/lib', self.build_lib + '/ns/_/lib')
-    self.copy_tree(f'{NS3_BUILD_PATH}/bin', self.build_lib + '/ns/_/bin')
 
 class NS3Install(install):
   def run(self):

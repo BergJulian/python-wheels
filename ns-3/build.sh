@@ -62,7 +62,7 @@ run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
-run cp -r "$repo/ns-3/ns" /opt/ns/
+run cp -r /opt/ns-3/build/bindings/python/ns /opt/ns/
 run cp "$repo/ns-3/ns/setup.py" /opt/ns/
 
 # Create Python site-packages directory and copy __init__.py
@@ -97,6 +97,7 @@ run python3 -m wheel pack -d dist2 "$ns3_patch"
 
 asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
 run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"
+run python3 -m pip install --force-reinstall "$asset_path"
 
 section ---------------- asset ----------------
 asset "$asset_path"

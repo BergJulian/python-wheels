@@ -10,7 +10,7 @@ run apt-get install -y --no-install-recommends \
         bzip2 \
         cmake \
         curl \
-        g++ \
+        g++-11 \
         git \
         libclang-dev \
         llvm-dev \

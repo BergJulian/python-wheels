@@ -79,8 +79,8 @@ PYTHON_MAJOR_VERSION=$(echo "$NS3_PYTHON_VERSION" | cut -d'.' -f1)
 
 # Fix shared library paths
 run rm -r "$ns3_patch/ns/_/lib/python$PYTHON_MAJOR_VERSION"* || true
-for f in "$ns3_patch"/ns/*.so; do
-    run patchelf --set-rpath '$ORIGIN/_/lib' "$f";
+for f in "$ns3_patch"/ns/_/lib/*.so; do
+    run patchelf --set-rpath '$ORIGIN' "$f";
 done
 for f in "$ns3_patch"/ns/_/bin/*; do
     if [ -f "$f" ]; then

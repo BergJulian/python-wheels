@@ -53,8 +53,9 @@ run ninja install
 section ---------------- NetAnim ----------------
 workdir /opt
 run git clone -b netanim-3.109 https://gitlab.com/nsnam/netanim.git
+run update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
 workdir /opt/netanim
-run qmake "QMAKE_CXX=/usr/bin/g++-11" NetAnim.pro
+run qmake NetAnim.pro
 run make -j $(nproc)
 run mkdir -p /ns-3-install/usr/local/bin
 run cp NetAnim /ns-3-install/usr/local/bin/

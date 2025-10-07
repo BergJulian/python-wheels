@@ -3,7 +3,7 @@ base="$repo/ns-3"
 
 section ---------------- install ----------------
 export NS3_VERSION=3.45
-export NS3_PYTHON_VERSION=3.9
+export NS3_PYTHON_VERSION=3.11
 
 run apt-get update
 run apt-get install -y --no-install-recommends \

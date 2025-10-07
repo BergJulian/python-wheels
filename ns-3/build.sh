@@ -45,6 +45,7 @@ run cmake -G Ninja \
     -DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/ns-3-install \
+    -DWARNING_AS_ERROR=OFF \
     ..
 run ninja
 run ninja install

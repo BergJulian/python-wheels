@@ -62,31 +62,32 @@ run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
+run cp -r "$repo/ns-3/ns" /opt/ns/
 run cp "$repo/ns-3/ns/setup.py" /opt/ns/
-run cp "$repo/ns-3/__init__.py" /opt/ns/
+
+# Create Python site-packages directory and copy __init__.py
+run mkdir -p /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns
+run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/
 
 workdir /opt/ns
 PY_PATH="/usr/bin/python${NS3_PYTHON_VERSION}"
 run $PY_PATH setup.py bdist_wheel
-
 run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
 
 ns3_patch="patch/ns-$NS3_VERSION"
 PYTHON_MAJOR_VERSION=$(echo "$NS3_PYTHON_VERSION" | cut -d'.' -f1)
 
+# Fix shared library paths
 run rm -r "$ns3_patch/ns/_/lib/python$PYTHON_MAJOR_VERSION"* || true
-
 for f in "$ns3_patch"/ns/*.so; do
     run patchelf --set-rpath '$ORIGIN/_/lib' "$f";
 done
-
 for f in "$ns3_patch"/ns/_/bin/*; do
     if [ -f "$f" ]; then
         run patchelf --set-rpath '$ORIGIN/../lib' "$f";
         run chmod +x "$f";
     fi
 done
-
 for f in "$ns3_patch"/ns/_/lib/*.so; do
     run patchelf --set-rpath '$ORIGIN' "$f";
 done

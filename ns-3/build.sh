@@ -51,6 +51,10 @@ run cmake -G Ninja \
 run ninja
 run ninja install
 
+run mkdir -p /ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages
+run cp -a /opt/ns-3/build/bindings/python/ns \
+    /ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages/
+
 run ls /opt/ns-3/build/bindings/python/ns
 
 section ---------------- NetAnim ----------------

@@ -44,6 +44,7 @@ run cmake -G Ninja \
 	-DCMAKE_CXX_COMPILER=/usr/bin/g++-11 \
 	-DNS3_PYTHON_BINDINGS=ON \
 	-DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
+	-DPYTHON_SITE_INSTALL_DIR=/ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=/ns-3-install \
 	..

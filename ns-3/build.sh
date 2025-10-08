@@ -68,44 +68,31 @@ run mkdir -p /ns-3-install/usr/local/bin
 run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
-# Python version variable already set:
-# NS3_PYTHON_VERSION=3.11
-
-# where cmake installed the python package
 SITE_PACKAGES="/ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages"
 
-# sanity-check: fail early if the built package isn't found
 run sh -c "if [ ! -d \"${SITE_PACKAGES}/ns\" ]; then echo 'ERROR: built ns package not found at ${SITE_PACKAGES}/ns' && ls -la \"${SITE_PACKAGES}\" || true; exit 1; fi"
 
-# prepare wheel build tree
-run rm -rf /opt/ns
-run mkdir -p /opt/ns
-# copy the full installed package (this includes compiled extension .so files under ns/_/)
-run cp -a "${SITE_PACKAGES}/ns" /opt/ns/
-
-# copy the top-level setup.py from the repo so bdist_wheel knows metadata
-run cp "$repo/ns-3/ns/setup.py" /opt/ns/setup.py
-# ensure __init__ (if repo kept it at repo/ns-3/__init__.py)
-run cp "$repo/ns-3/__init__.py" /opt/ns/ns/__init__.py
+run mkdir -p /opt/ns-3
+run cp -a "${SITE_PACKAGES}/ns" /opt/ns-3/
+run cp -r "$repo/ns-3/ns" /opt/ns-3/ns/
+run cp "$repo/ns-3/__init__.py" /opt/ns-3/__init__.py
 
 # (Optional) confirm files are present (helpful for debugging)
 run sh -c "echo '=== /opt/ns tree ===' && find /opt/ns -maxdepth 4 -type f -ls | sed -n '1,200p'"
 
-workdir /opt/ns
-# build wheel using the correct python
+workdir /opt/ns-3
 run /usr/bin/python${NS3_PYTHON_VERSION} setup.py bdist_wheel
 
-# unpack and re-pack to normalize the wheel name if needed (this step is optional)
-run python3 -m wheel unpack -d patch "dist/ns-${NS3_VERSION}-py3-none-any.whl"
 # If you must adjust rpaths (patchelf) do it here on the copied .so files:
-run set -eux; \
-    for f in patch/ns-*/ns/_/**/*.so patch/ns-*/ns/_/*.so 2>/dev/null; do \
-        echo "patchelf setting rpath for $f"; \
-        patchelf --set-rpath '$ORIGIN' "$f" || true; \
-    done
+# run set -eux; \
+#    for f in patch/ns-*/ns/_/**/*.so patch/ns-*/ns/_/*.so 2>/dev/null; do \
+#        echo "patchelf setting rpath for $f"; \
+#        patchelf --set-rpath '$ORIGIN' "$f" || true; \
+#    done
 
 run mkdir -p dist2
 run python3 -m wheel pack -d dist2 "patch/ns-${NS3_VERSION}"
+
 asset_path="$base/ns-${NS3_VERSION}-py3-none-linux_x86_64.whl"
 run cp "dist2/ns-${NS3_VERSION}-py3-none-any.whl" "$asset_path"
 

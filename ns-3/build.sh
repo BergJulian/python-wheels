@@ -50,6 +50,8 @@ run cmake -G Ninja \
 run ninja
 run ninja install
 
+run ls /opt/ns-3/build/bindings/python/ns
+
 section ---------------- NetAnim ----------------
 workdir /opt
 run git clone -b netanim-3.109 https://gitlab.com/nsnam/netanim.git
@@ -97,7 +99,6 @@ run python3 -m wheel pack -d dist2 "$ns3_patch"
 
 asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
 run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"
-run python3 -m pip install --force-reinstall "$asset_path"
 
 section ---------------- asset ----------------
 asset "$asset_path"

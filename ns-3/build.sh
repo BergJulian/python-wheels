@@ -44,18 +44,11 @@ run cmake -G Ninja \
 	-DCMAKE_CXX_COMPILER=/usr/bin/g++-11 \
 	-DNS3_PYTHON_BINDINGS=ON \
 	-DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
-	-DPYTHON_SITE_INSTALL_DIR=/ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_INSTALL_PREFIX=/ns-3-install \
 	..
 run ninja
 run ninja install
-
-run mkdir -p /ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages
-run cp -a /opt/ns-3/build/bindings/python/ns \
-    /ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages/
-
-run ls /opt/ns-3/build/bindings/python/ns
 
 section ---------------- NetAnim ----------------
 workdir /opt
@@ -68,34 +61,44 @@ run mkdir -p /ns-3-install/usr/local/bin
 run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
-SITE_PACKAGES="/ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages"
+run mkdir -p /opt/ns/ns/_/lib
+run mkdir -p /opt/ns/ns/_/bin
 
-run sh -c "if [ ! -d \"${SITE_PACKAGES}/ns\" ]; then echo 'ERROR: built ns package not found at ${SITE_PACKAGES}/ns' && ls -la \"${SITE_PACKAGES}\" || true; exit 1; fi"
+# Copy ns-3 shared libraries (.so files)
+run cp -r /ns-3-install/lib/*.so /opt/ns/ns/_/lib/ || true
 
-run mkdir -p /opt/ns-3
-run cp -a "${SITE_PACKAGES}/ns" /opt/ns-3/
-run cp -r "$repo/ns-3/ns" /opt/ns-3/ns/
-run cp "$repo/ns-3/__init__.py" /opt/ns-3/__init__.py
+# Copy binaries (optional, e.g., ns3, helpers, etc.)
+run cp -r /ns-3-install/bin/* /opt/ns/ns/_/bin/ || true
 
-# (Optional) confirm files are present (helpful for debugging)
-run sh -c "echo '=== /opt/ns tree ===' && find /opt/ns -maxdepth 4 -type f -ls | sed -n '1,200p'"
+# Copy Python site-packages (if bindings installed there)
+run cp -r /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/* /opt/ns/ns/ || true
 
-workdir /opt/ns-3
-run python3 -m pip install --upgrade pip wheel setuptools cmake_build_extension --break-system-packages
-run /usr/bin/python${NS3_PYTHON_VERSION} setup.py bdist_wheel
+run mkdir -p /opt/ns
+run cp -r "$repo/ns-3/ns" /opt/ns/
+run cp "$repo/ns-3/ns/setup.py" /opt/ns/
 
-# If you must adjust rpaths (patchelf) do it here on the copied .so files:
-# run set -eux; \
-#    for f in patch/ns-*/ns/_/**/*.so patch/ns-*/ns/_/*.so 2>/dev/null; do \
-#        echo "patchelf setting rpath for $f"; \
-#        patchelf --set-rpath '$ORIGIN' "$f" || true; \
-#    done
+# Create correct Python site-packages directory and copy __init__.py
+run mkdir -p /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns
+run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/
 
-run mkdir -p dist2
-run python3 -m wheel pack -d dist2 "patch/ns-${NS3_VERSION}"
+for f in /opt/ns/ns/_/lib/*.so; do
+    run patchelf --set-rpath '$ORIGIN' "$f" || true
+done
 
-asset_path="$base/ns-${NS3_VERSION}-py3-none-linux_x86_64.whl"
-run cp "dist2/ns-${NS3_VERSION}-py3-none-any.whl" "$asset_path"
+for f in /opt/ns/ns/_/bin/*; do
+    run patchelf --set-rpath '$ORIGIN/../lib' "$f" || true
+done
+
+workdir /opt/ns
+PY_PATH="/usr/bin/python${NS3_PYTHON_VERSION}"
+run $PY_PATH setup.py bdist_wheel
+run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
+
+run mkdir dist2
+run python3 -m wheel pack -d dist2 "patch/ns-$NS3_VERSION"
+
+asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
+run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"
 
 section ---------------- asset ----------------
 asset "$asset_path"

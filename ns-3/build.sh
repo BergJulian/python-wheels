@@ -81,6 +81,7 @@ run cp "$repo/ns-3/__init__.py" /opt/ns-3/__init__.py
 run sh -c "echo '=== /opt/ns tree ===' && find /opt/ns -maxdepth 4 -type f -ls | sed -n '1,200p'"
 
 workdir /opt/ns-3
+run python3 -m pip install --upgrade pip wheel setuptools cmake_build_extension
 run /usr/bin/python${NS3_PYTHON_VERSION} setup.py bdist_wheel
 
 # If you must adjust rpaths (patchelf) do it here on the copied .so files:

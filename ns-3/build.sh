@@ -60,45 +60,49 @@ workdir /opt/netanim
 run qmake NetAnim.pro
 run make -j $(nproc)
 run mkdir -p /ns-3-install/usr/local/bin
-run cp NetAnim /ns-3-install/usr/local/bin/
+run cp NetAnim /ns-3-install/usr/local/bino/
 
 section ---------------- python wheel ----------------
-run mkdir -p /opt/ns
-run cp -r /opt/ns-3/build/bindings/python/ns /opt/ns/
-run cp "$repo/ns-3/ns/setup.py" /opt/ns/
+# Python version variable already set:
+# NS3_PYTHON_VERSION=3.11
 
-# Create Python site-packages directory and copy __init__.py
-run mkdir -p /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns
-run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/
+# where cmake installed the python package
+SITE_PACKAGES="/ns-3-install/lib/python${NS3_PYTHON_VERSION}/site-packages"
+
+# sanity-check: fail early if the built package isn't found
+run sh -c "if [ ! -d \"${SITE_PACKAGES}/ns\" ]; then echo 'ERROR: built ns package not found at ${SITE_PACKAGES}/ns' && ls -la \"${SITE_PACKAGES}\" || true; exit 1; fi"
+
+# prepare wheel build tree
+run rm -rf /opt/ns
+run mkdir -p /opt/ns
+# copy the full installed package (this includes compiled extension .so files under ns/_/)
+run cp -a "${SITE_PACKAGES}/ns" /opt/ns/
+
+# copy the top-level setup.py from the repo so bdist_wheel knows metadata
+run cp "$repo/ns-3/setup.py" /opt/ns/setup.py
+# ensure __init__ (if repo kept it at repo/ns-3/__init__.py)
+run cp "$repo/ns-3/__init__.py" /opt/ns/ns/__init__.py
+
+# (Optional) confirm files are present (helpful for debugging)
+run sh -c "echo '=== /opt/ns tree ===' && find /opt/ns -maxdepth 4 -type f -ls | sed -n '1,200p'"
 
 workdir /opt/ns
-PY_PATH="/usr/bin/python${NS3_PYTHON_VERSION}"
-run $PY_PATH setup.py bdist_wheel
-run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
+# build wheel using the correct python
+run /usr/bin/python${NS3_PYTHON_VERSION} setup.py bdist_wheel
 
-ns3_patch="patch/ns-$NS3_VERSION"
-PYTHON_MAJOR_VERSION=$(echo "$NS3_PYTHON_VERSION" | cut -d'.' -f1)
+# unpack and re-pack to normalize the wheel name if needed (this step is optional)
+run python3 -m wheel unpack -d patch "dist/ns-${NS3_VERSION}-py3-none-any.whl"
+# If you must adjust rpaths (patchelf) do it here on the copied .so files:
+run set -eux; \
+    for f in patch/ns-*/ns/_/**/*.so patch/ns-*/ns/_/*.so 2>/dev/null; do \
+        echo "patchelf setting rpath for $f"; \
+        patchelf --set-rpath '$ORIGIN' "$f" || true; \
+    done
 
-# Fix shared library paths
-run rm -r "$ns3_patch/ns/_/lib/python$PYTHON_MAJOR_VERSION"* || true
-for f in "$ns3_patch"/ns/_/lib/*.so; do
-    run patchelf --set-rpath '$ORIGIN' "$f";
-done
-for f in "$ns3_patch"/ns/_/bin/*; do
-    if [ -f "$f" ]; then
-        run patchelf --set-rpath '$ORIGIN/../lib' "$f";
-        run chmod +x "$f";
-    fi
-done
-for f in "$ns3_patch"/ns/_/lib/*.so; do
-    run patchelf --set-rpath '$ORIGIN' "$f";
-done
-
-run mkdir dist2
-run python3 -m wheel pack -d dist2 "$ns3_patch"
-
-asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
-run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"
+run mkdir -p dist2
+run python3 -m wheel pack -d dist2 "patch/ns-${NS3_VERSION}"
+asset_path="$base/ns-${NS3_VERSION}-py3-none-linux_x86_64.whl"
+run cp "dist2/ns-${NS3_VERSION}-py3-none-any.whl" "$asset_path"
 
 section ---------------- asset ----------------
 asset "$asset_path"

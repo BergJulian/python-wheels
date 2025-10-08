@@ -84,7 +84,7 @@ run mkdir -p /opt/ns
 run cp -a "${SITE_PACKAGES}/ns" /opt/ns/
 
 # copy the top-level setup.py from the repo so bdist_wheel knows metadata
-run cp "$repo/ns-3/setup.py" /opt/ns/setup.py
+run cp "$repo/ns-3/ns/setup.py" /opt/ns/setup.py
 # ensure __init__ (if repo kept it at repo/ns-3/__init__.py)
 run cp "$repo/ns-3/__init__.py" /opt/ns/ns/__init__.py
 

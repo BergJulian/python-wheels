@@ -60,7 +60,7 @@ workdir /opt/netanim
 run qmake NetAnim.pro
 run make -j $(nproc)
 run mkdir -p /ns-3-install/usr/local/bin
-run cp NetAnim /ns-3-install/usr/local/bino/
+run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
 # Python version variable already set:

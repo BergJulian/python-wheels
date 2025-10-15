@@ -65,7 +65,6 @@ run mkdir -p /opt/ns
 run cp -r "$repo/ns-3/ns" /opt/ns/
 run cp "$repo/ns-3/ns/setup.py" /opt/ns/
 
-# Create correct Python site-packages directory and copy __init__.py
 run mkdir -p /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns
 run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/
 

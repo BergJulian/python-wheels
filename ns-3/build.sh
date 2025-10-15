@@ -61,18 +61,6 @@ run mkdir -p /ns-3-install/usr/local/bin
 run cp NetAnim /ns-3-install/usr/local/bin/
 
 section ---------------- python wheel ----------------
-run mkdir -p /opt/ns/ns/_/lib
-run mkdir -p /opt/ns/ns/_/bin
-
-# Copy ns-3 shared libraries (.so files)
-run cp -r /ns-3-install/lib/*.so /opt/ns/ns/_/lib/ || true
-
-# Copy binaries (optional, e.g., ns3, helpers, etc.)
-run cp -r /ns-3-install/bin/* /opt/ns/ns/_/bin/ || true
-
-# Copy Python site-packages (if bindings installed there)
-run cp -r /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/* /opt/ns/ns/ || true
-
 run mkdir -p /opt/ns
 run cp -r "$repo/ns-3/ns" /opt/ns/
 run cp "$repo/ns-3/ns/setup.py" /opt/ns/
@@ -80,14 +68,6 @@ run cp "$repo/ns-3/ns/setup.py" /opt/ns/
 # Create correct Python site-packages directory and copy __init__.py
 run mkdir -p /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns
 run cp "$repo/ns-3/__init__.py" /ns-3-install/lib/python$NS3_PYTHON_VERSION/site-packages/ns/
-
-for f in /opt/ns/ns/_/lib/*.so; do
-    run patchelf --set-rpath '$ORIGIN' "$f" || true
-done
-
-for f in /opt/ns/ns/_/bin/*; do
-    run patchelf --set-rpath '$ORIGIN/../lib' "$f" || true
-done
 
 workdir /opt/ns
 PY_PATH="/usr/bin/python${NS3_PYTHON_VERSION}"

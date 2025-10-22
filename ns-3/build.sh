@@ -37,7 +37,11 @@ section ---------------- download ----------------
 workdir /opt
 run curl -L -o ns-3.tar.bz2 https://www.nsnam.org/releases/ns-allinone-$NS3_VERSION.tar.bz2
 runsh "echo '${ns3_download_sha1} ns-3.tar.bz2' | sha1sum -c"
-run mkdir ns-3 && tar xjf ns-3.tar.bz2 --strip-components 1 -C ns-3
+# run mkdir ns-3 && tar xjf ns-3.tar.bz2 --strip-components 1 -C ns-3
+run mkdir -p /opt/ns-3
+run tar xjf ns-3.tar.bz2
+run mv ns-allinone-$NS3_VERSION/ns-$NS3_VERSION/* /opt/ns-3/
+
 
 section ---------------- build ns-3 ----------------
 workdir /opt/ns-3

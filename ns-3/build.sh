@@ -28,14 +28,14 @@ run apt-get install -y --no-install-recommends \
 
 
 # 3.45
-ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc
+# ns3_download_sha1=b47774dd89ec770a3bc88cf95251319aa0266afc
 
 # 3.46
-# ns3_download_sha1=15f7e24e0e63ad64c0a65cef2724a71ef9443447
+ns3_download_sha1=15f7e24e0e63ad64c0a65cef2724a71ef9443447
 
 section ---------------- download ----------------
 workdir /opt
-run curl -L -o ns-3.tar.bz2 https://www.nsnam.org/releases/ns-allinone-$NS3_VERSION.tar.bz2
+run curl -L -o ns-3.tar.bz2 https://www.nsnam.org/releases/ns-$NS3_VERSION.tar.bz2
 runsh "echo '${ns3_download_sha1} ns-3.tar.bz2' | sha1sum -c"
 run mkdir ns-3 && tar xjf ns-3.tar.bz2 --strip-components 1 -C ns-3
 

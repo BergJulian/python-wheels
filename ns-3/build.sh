@@ -51,87 +51,75 @@ for d in netanim-*; do
 done
 
 section ---------------- ns-3 build ----------------
-workdir "/opt/ns-3/ns-$NS3_VERSION"
-run ./ns3 configure --enable-examples --enable-tests --enable-python-bindings
-run ./ns3 build -j $(nproc)
-
-# install libraries/executables into staging prefix so we can copy them into the wheel layout
-run mkdir -p /ns-3-build/usr/local
+workdir /opt/ns-3/ns-$NS3_VERSION
+run mkdir build
 workdir /opt/ns-3/ns-$NS3_VERSION/build
-run cmake --install . --prefix /ns-3-build/usr/local
+run cmake -G Ninja \
+    -DCMAKE_CXX_COMPILER=/usr/bin/g++-11 \
+    -DNS3_PYTHON_BINDINGS=ON \
+    -DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/ns-3-build/usr/local \
+    ..
+run ninja
+run ninja install
 
-section ---------------- prepare python wheel sources ----------------
-# create a working packaging tree like your old script did
-run mkdir -p /opt/ns-wheel
-workdir /opt/ns-wheel
+section ---------------- python wheel ----------------
+run mkdir -p /opt/ns
+workdir /opt/ns
 
-# copy your small hand-maintained wrapper package (assumes $base has your packaging files)
-# keep the same pattern as your old script: copy __init__.py into staging site-packages, and prepare /opt/ns for bdist
-run mkdir -p /ns-3-build/usr/local/lib/python3/dist-packages/ns
-run cp "$base/__init__.py" /ns-3-build/usr/local/lib/python3/dist-packages/ns/
-
-# Copy the ns Python bindings that ns-3 created into the packaging tree.
-# The built python binding files live under: ns-3 build tree -> build/bindings/python/ns
-# Find them and copy them into /opt/ns (source for setup.py)
+run cp -r "$repo/ns-3/ns" /opt/ns/
+run cp "$repo/ns-3/ns/setup.py" /opt/ns/
 run cp -r "/opt/ns-3/ns-$NS3_VERSION/build/bindings/python/ns" /opt/ns
 
-# If the build used a different CMake cache folder, adjust the above path accordingly.
-
-# Also copy the installed shared libs and helper executables into the final ns/_ layout
 ns3_patch="patch/ns-$NS3_VERSION"
 run rm -rf "$ns3_patch"
 run mkdir -p "$ns3_patch/ns/_/lib" "$ns3_patch/ns/_/bin"
 
-# Copy all installed ns-3 shared libraries into ns/_/lib
 run cp /ns-3-build/usr/local/lib/libns3* "$ns3_patch/ns/_/lib/" || true
-# Copy any other .so ns libraries (e.g., libpython helpers) if present
-run cp /ns-3-build/usr/local/lib/*.so* "$ns3_patch/ns/_/lib/" || true || true
+run cp /ns-3-build/usr/local/lib/*.so* "$ns3_patch/ns/_/lib/" || true
 
-# Copy installed binaries that you want packaged (e.g., ns3 helper binaries) into ns/_/bin
+# Helper binaries
 run cp /ns-3-build/usr/local/bin/* "$ns3_patch/ns/_/bin/" || true
 
-# Now copy the python package source into the patch dir (so wheel contains the same 'ns' package root)
+# Copy Python package source into patch folder
 run mkdir -p "$ns3_patch/ns"
-run cp -r /opt/ns/* "$ns3_patch/ns/" || true
-# Ensure __init__.py is present (from earlier copy)
-run cp /ns-3-build/usr/local/lib/python3/dist-packages/ns/__init__.py "$ns3_patch/ns/" || true
+run cp -r /opt/ns/* "$ns3_patch/ns/"
+# Ensure __init__.py is present
+run cp /ns-3-build/usr/local/lib/python$NS3_PYTHON_VERSION/site-packages/ns/__init__.py "$ns3_patch/ns/" || true
 
-section ---------------- replicate original wheel processing ----------------
-# Now follow your old wheel manipulation steps: build a wheel skeleton, unpack, then fix rpaths the same way
-# Create a temporary pure-Python wheel using your local setup (bdist_wheel) - this requires setup.py to exist in /opt/ns
+# Build temporary pure-Python wheel skeleton
 workdir /opt/ns
-# Create a source wheel as before
 run python3 setup.py bdist_wheel
 
-# Unpack the wheel to a mutable folder so we can inject the native libs
+# Unpack wheel to inject native libs/bins
 run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
 
-# Remove any nested python-version specific dir if present (old script did that)
-run rm -r "$ns3_patch/ns/_/lib/python3" || true || true
+# Remove nested python-version specific dir if present (cleanup)
+run rm -rf "$ns3_patch/ns/_/lib/python$NS3_PYTHON_VERSION" || true
 
-# Move installed native libs/bins into the unpacked wheel layout:
-# We already copied the built libs and bins into $ns3_patch/ns/_/{lib,bin}
-
-# Fix rpaths exactly like your old script so the wheel is self-contained:
+# Fix RPATHs for shared libraries
 for f in "$ns3_patch"/ns/*.so; do
-	patchelf --set-rpath '$ORIGIN/_/lib' "$f" || true
+    patchelf --set-rpath '$ORIGIN/_/lib' "$f" || true
 done
 
 for f in "$ns3_patch"/ns/_/bin/*; do
-	patchelf --set-rpath '$ORIGIN/../lib' "$f" || true
-	chmod +x "$f" || true
+    patchelf --set-rpath '$ORIGIN/../lib' "$f" || true
+    chmod +x "$f" || true
 done
 
 for f in "$ns3_patch"/ns/_/lib/*.so*; do
-	patchelf --set-rpath '$ORIGIN' "$f" || true
+    patchelf --set-rpath '$ORIGIN' "$f" || true
 done
 
 # Repack the wheel
 run mkdir -p dist2
 run python3 -m wheel pack -d dist2 "$ns3_patch"
 
+# Copy final wheel to asset path
 asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
-run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path" || true
+run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"
 
 section ---------------- asset ----------------
 asset "$asset_path"
+

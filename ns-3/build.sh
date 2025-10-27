@@ -64,6 +64,9 @@ run cmake -G Ninja \
 run ninja
 run ninja install
 
+run mkdir -p /ns-3-build/usr/local/lib/python${NS3_PYTHON_VERSION}/site-packages
+run cp -r /opt/ns-3/ns-$NS3_VERSION/build/bindings/python/ns /ns-3-build/usr/local/lib/python${NS3_PYTHON_VERSION}/site-packages/
+
 section ---------------- python wheel ----------------
 run mkdir -p /opt/ns
 workdir /opt/ns

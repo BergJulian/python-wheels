@@ -57,6 +57,8 @@ run mkdir build
 workdir /opt/ns-3/ns-$NS3_VERSION/build
 run cmake -G Ninja \
     -DNS3_PYTHON_BINDINGS=ON \
+    -DNS3_EXAMPLES=ON \
+    -DNS3_TESTS=ON \
     -DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/ns-3-build/usr/local \

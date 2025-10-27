@@ -8,7 +8,7 @@ from distutils.command.build import build
 from subprocess import call
 from multiprocessing import cpu_count
 
-NS3_BUILD_PATH = '/ns-3-install'
+NS3_BUILD_PATH = '/ns-3-build/usr/local'
 NS3_VERSION = os.environ['NS3_VERSION']
 PY_VER = os.environ.get('NS3_PYTHON_VERSION', f"{version_info.major}.{version_info.minor}")
 PY_VER = f"python{PY_VER}"

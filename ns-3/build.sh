@@ -19,10 +19,9 @@ run apt-get install -y --no-install-recommends \
  	python3-setuptools \
  	python3-wheel \
  	qtbase5-dev \
-+	libboost-dev \
-+	libboost-system-dev \
-+	libboost-thread-dev \
-+	# (optional: libboost-all-dev to install everything)
+	libboost-dev \
+	libboost-system-dev \
+	libboost-thread-dev \
  	ninja-build \
  	zip \
 	&& true

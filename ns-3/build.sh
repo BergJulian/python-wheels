@@ -84,8 +84,7 @@ run cp /ns-3-build/usr/local/bin/* "$ns3_patch/ns/_/bin/" || true
 
 # Copy Python package source into patch folder
 run mkdir -p "$ns3_patch/ns"
-run cp -r /opt/ns/* "$ns3_patch/ns/"
-# Ensure __init__.py is present
+run cp -r /opt/ns/ns /opt/ns/setup.py "$ns3_patch/ns/"
 run cp /ns-3-build/usr/local/lib/python$NS3_PYTHON_VERSION/site-packages/ns/__init__.py "$ns3_patch/ns/" || true
 
 # Build temporary pure-Python wheel skeleton

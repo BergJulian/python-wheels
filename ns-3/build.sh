@@ -37,14 +37,15 @@ runsh "echo '${ns_allinone_sha1} ../ns-allinone-$NS3_VERSION.tar.bz2' | sha1sum 
 run tar xj --strip-components 1 -f ../ns-allinone-$NS3_VERSION.tar.bz2
 
 section ---------------- NetAnim ----------------
-# NetAnim now uses CMake. build/bin/netanim is the produced binary.
-workdir netanim-*
-run mkdir -p build
-workdir netanim-*/build
-run cmake .. -G "Unix Makefiles"
-run cmake --build . -- -j $(nproc)
-run mkdir -p /ns-3-build/usr/local/bin
-run cp build/bin/netanim /ns-3-build/usr/local/bin || true
+for d in netanim-*; do
+  [ -d "$d" ] || continue
+  mkdir -p "$d/build"
+  pushd "$d/build" >/dev/null
+  cmake .. -G "Unix Makefiles"
+  cmake --build . -- -j"$(nproc)"
+  find . -type f -name 'netanim' -executable -exec cp {} /ns-3-build/usr/local/bin/ \;
+  popd >/dev/null
+done
 
 section ---------------- ns-3 build ----------------
 workdir "/opt/ns-3/ns-$NS3_VERSION"

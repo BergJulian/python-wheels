@@ -88,7 +88,9 @@ run cp -r /opt/ns/ns /opt/ns/setup.py "$ns3_patch/ns/"
 run cp /ns-3-build/usr/local/lib/python$NS3_PYTHON_VERSION/site-packages/ns/__init__.py "$ns3_patch/ns/" || true
 
 # Build temporary pure-Python wheel skeleton
-workdir /opt/ns
+run mkdir -p /tmp/ns-wheel
+run cp -r /opt/ns/ns /opt/ns/setup.py /tmp/ns-wheel/
+workdir /tmp/ns-wheel
 run python3 setup.py bdist_wheel
 
 # Unpack wheel to inject native libs/bins

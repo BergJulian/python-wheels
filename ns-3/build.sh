@@ -55,7 +55,6 @@ workdir /opt/ns-3/ns-$NS3_VERSION
 run mkdir build
 workdir /opt/ns-3/ns-$NS3_VERSION/build
 run cmake -G Ninja \
-    -DCMAKE_CXX_COMPILER=/usr/bin/g++-11 \
     -DNS3_PYTHON_BINDINGS=ON \
     -DPYTHON_EXECUTABLE=/usr/bin/python${NS3_PYTHON_VERSION} \
     -DCMAKE_BUILD_TYPE=Release \

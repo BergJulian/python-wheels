@@ -4,23 +4,27 @@ base="$repo/ns-3"
 section ---------------- install ----------------
 run apt-get update
 run apt-get install -y --no-install-recommends \
-	bzip2 \
-	cmake \
-	curl \
-	g++ \
-	git \
-	libclang-dev \
-	llvm-dev \
-	make \
-	patch \
-	patchelf \
-	python3-dev \
-	python3-pip \
-	python3-setuptools \
-	python3-wheel \
-	qtbase5-dev \
-	ninja-build \
-	zip \
+ 	bzip2 \
+ 	cmake \
+ 	curl \
+ 	g++ \
+ 	git \
+ 	libclang-dev \
+ 	llvm-dev \
+ 	make \
+ 	patch \
+ 	patchelf \
+ 	python3-dev \
+ 	python3-pip \
+ 	python3-setuptools \
+ 	python3-wheel \
+ 	qtbase5-dev \
++	libboost-dev \
++	libboost-system-dev \
++	libboost-thread-dev \
++	# (optional: libboost-all-dev to install everything)
+ 	ninja-build \
+ 	zip \
 	&& true
 
 export NS3_VERSION=3.45

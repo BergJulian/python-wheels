@@ -101,6 +101,15 @@ run python3 -m wheel unpack -d /tmp/ns-wheel-unpack "dist/ns-$NS3_VERSION-py3-no
 # set an explicit unpack_dir path (do not rely on shell vars across run steps)
 UNPACK_DIR="/tmp/ns-wheel-unpack/ns-$NS3_VERSION"
 run mkdir -p "$UNPACK_DIR/ns/_/lib" "$UNPACK_DIR/ns/_/bin" || true
+run mkdir -p "$UNPACK_DIR/ns/_/include" || true
+
+if [ -d /ns-3-build/usr/local/include ]; then
+  run cp -a /ns-3-build/usr/local/include/. "$UNPACK_DIR/ns/_/include/" || true
+elif [ -d /opt/ns-3/ns/include ]; then
+  run cp -a /opt/ns-3/ns/include/. "$UNPACK_DIR/ns/_/include/" || true
+else
+  echo "WARNING: no ns-3 include directory found to copy" || true
+fi
 
 if [ -d /ns-3-build/usr/local/lib ]; then
   run find /ns-3-build/usr/local/lib -maxdepth 1 -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P '{}' "$UNPACK_DIR/ns/_/lib/" \; || true

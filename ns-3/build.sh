@@ -26,6 +26,9 @@ run apt-get install -y --no-install-recommends \
  	zip \
 	&& true
 
+run python3 -m pip install --no-cache-dir "cppyy>=3.1.2"
+run python3 -m pip install --no-cache-dir cppyy-backend || true
+
 export NS3_VERSION=3.45
 export NS3_PYTHON_VERSION=3.11
 

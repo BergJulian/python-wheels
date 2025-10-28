@@ -97,15 +97,26 @@ run python3 -m wheel unpack -d /tmp/ns-wheel-unpack "dist/ns-$NS3_VERSION-py3-no
 
 run unpack_dir="/tmp/ns-wheel-unpack/ns-$NS3_VERSION" && mkdir -p "$unpack_dir/ns/_/lib" "$unpack_dir/ns/_/bin" || true
 
-run find /ns-3-build/usr/local/lib -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P '{}' "$unpack_dir/ns/_/lib/" \; || true
-run find /ns-3-build -type f -name '*.so*' -exec cp -P '{}' "$unpack_dir/ns/_/lib/" \; || true
-run find /ns-3-build/usr/local/bin -type f -exec cp '{}' "$unpack_dir/ns/_/bin/" \; || true
-
+run find /ns-3-build/usr/local/lib -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P {} "$unpack_dir/ns/_/lib/" \;
+run find /ns-3-build -type f -name '*.so*' -exec cp -P {} "$unpack_dir/ns/_/lib/" \;
+run find /ns-3-build/usr/local/bin -type f -exec cp {} "$unpack_dir/ns/_/bin/" \;
 run rm -rf "$unpack_dir/ns/_/lib/python$NS3_PYTHON_VERSION" || true
 
-run for f in "$unpack_dir"/ns/*.so; do [ -f "$f" ] || continue; patchelf --set-rpath '$ORIGIN/_/lib' "$f" || true; done
-run for f in "$unpack_dir"/ns/_/bin/*; do [ -f "$f" ] || continue; patchelf --set-rpath '$ORIGIN/../lib' "$f" || true; chmod +x "$f" || true; done
-run for f in "$unpack_dir"/ns/_/lib/*.so*; do [ -f "$f" ] || continue; patchelf --set-rpath '$ORIGIN' "$f" || true; done
+for f in "$unpack_dir"/ns/*.so; do
+    [ -f "$f" ] || continue
+    patchelf --set-rpath '$ORIGIN/_/lib' "$f" || true
+done
+
+for f in "$unpack_dir"/ns/_/bin/*; do
+    [ -f "$f" ] || continue
+    patchelf --set-rpath '$ORIGIN/../lib' "$f" || true
+    chmod +x "$f" || true
+done
+
+for f in "$unpack_dir"/ns/_/lib/*.so*; do
+    [ -f "$f" ] || continue
+    patchelf --set-rpath '$ORIGIN' "$f" || true
+done
 
 run mkdir -p dist2
 run python3 -m wheel pack -d dist2 "$unpack_dir"

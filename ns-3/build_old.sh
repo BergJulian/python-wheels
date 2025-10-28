@@ -144,50 +144,89 @@ run mkdir -p /ns-3-build/usr/local/lib/python${NS3_PYTHON_VERSION}/site-packages
 run cp -r /opt/ns-3/ns-$NS3_VERSION/build/bindings/python/ns /ns-3-build/usr/local/lib/python${NS3_PYTHON_VERSION}/site-packages/
 
 section ---------------- python wheel ----------------
+run mkdir -p /opt/ns
+workdir /opt/ns
+
+run cp -r "$repo/ns-3/ns" /opt/ns/
+run cp "$repo/ns-3/ns/setup.py" /opt/ns/
+run cp -r "/opt/ns-3/ns-$NS3_VERSION/build/bindings/python/ns" /opt/ns
+
 ns3_patch="patch/ns-$NS3_VERSION"
 run rm -rf "$ns3_patch"
-run mkdir -p "$ns3_patch/ns/_/lib" "$ns3_patch/ns/_/bin" "$ns3_patch/ns/_/share" "$ns3_patch/ns"
+run mkdir -p "$ns3_patch/ns/_/lib" "$ns3_patch/ns/_/bin"
 
-run mkdir -p /opt/ns
-run cp -r "$repo/ns-3/ns" /opt/ns/ || true
-run cp "$repo/ns-3/ns/setup.py" /opt/ns/ || true
+# copy shared libs and binaries into the patch directory
+run find /ns-3-build/usr/local/lib -maxdepth 1 -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P '{}' "$ns3_patch/ns/_/lib/" \; || true
+run find /ns-3-build -type f -name '*.so*' -exec cp -P '{}' "$ns3_patch/ns/_/lib/" \; || true
+run find /ns-3-build/usr/local/bin -type f -exec cp '{}' "$ns3_patch/ns/_/bin/" \; || true
 
+run mkdir -p "$ns3_patch/ns"
+run cp -r /opt/ns/ns /opt/ns/setup.py "$ns3_patch/ns/"
+run cp /ns-3-build/usr/local/lib/python$NS3_PYTHON_VERSION/site-packages/ns/__init__.py "$ns3_patch/ns/" || true
+
+# build wheel from source
 run mkdir -p /tmp/ns-wheel
 run cp -r /opt/ns/ns /opt/ns/setup.py /tmp/ns-wheel/
 workdir /tmp/ns-wheel
 run python3 setup.py bdist_wheel
 
+# unpack the produced wheel into a known directory
+run python3 -m wheel unpack -d /tmp/ns-wheel-unpack "dist/ns-$NS3_VERSION-py3-none-any.whl" || python3 -m wheel unpack -d /tmp/ns-wheel-unpack dist/*.whl
 
-run python3 -m wheel unpack -d patch "dist/ns-$NS3_VERSION-py3-none-any.whl"
-run cp -a /ns-3-build/usr/local/lib/* "$ns3_patch/ns/_/lib/" || true
-run cp -a /ns-3-build/usr/local/bin/* "$ns3_patch/ns/_/bin/" || true
-run cp -a /ns-3-build/usr/local/share/* "$ns3_patch/ns/_/share/" || true
-run cp -a /ns-3-build/usr/local/lib/python${NS3_PYTHON_VERSION}/site-packages/ns "$ns3_patch/ns/" || true
-run cp -a /ns-3-build/usr/local/lib/python${NS3_PYTHON_VERSION}/dist-packages/ns "$ns3_patch/ns/" || true
-run cp -a /opt/ns-3/ns-$NS3_VERSION/build/bindings/python/ns/*.so "$ns3_patch/ns/" || true
-run cp -a "$repo/ns-3/__init__.py" "$ns3_patch/ns/" || true
-run rm -rf "$ns3_patch/ns/_/lib/python${NS3_PYTHON_VERSION}" || true
+# set an explicit unpack_dir path (do not rely on shell vars across run steps)
+UNPACK_DIR="/tmp/ns-wheel-unpack/ns-$NS3_VERSION"
+run mkdir -p "$UNPACK_DIR/ns/_/lib" "$UNPACK_DIR/ns/_/bin" || true
 
-for f in "$ns3_patch"/ns/*.so; do
+# --- NEW: copy headers so cppyy can find them at runtime ---
+# copy installed headers from the install prefix
+if [ -d /ns-3-build/usr/local/include ]; then
+  run mkdir -p "$UNPACK_DIR/ns/_/include"
+  run cp -a /ns-3-build/usr/local/include/. "$UNPACK_DIR/ns/_/include/" || true
+fi
+
+# fallback: copy headers from the ns-3 build tree if install prefix didn't contain them
+if [ -d /opt/ns-3/ns-$NS3_VERSION/build/include ]; then
+  run mkdir -p "$UNPACK_DIR/ns/_/include"
+  run cp -a /opt/ns-3/ns-$NS3_VERSION/build/include/. "$UNPACK_DIR/ns/_/include/" || true
+fi
+# -------------------------------------------------------------------
+
+if [ -d /ns-3-build/usr/local/lib ]; then
+  run find /ns-3-build/usr/local/lib -maxdepth 1 -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P '{}' "$UNPACK_DIR/ns/_/lib/" \; || true
+fi
+
+if [ -d /ns-3-build ]; then
+  run find /ns-3-build -type f -name '*.so*' -exec cp -P '{}' "$UNPACK_DIR/ns/_/lib/" \; || true
+fi
+
+if [ -d /ns-3-build/usr/local/bin ]; then
+  run find /ns-3-build/usr/local/bin -type f -exec cp '{}' "$UNPACK_DIR/ns/_/bin/" \; || true
+fi
+
+run rm -rf "$UNPACK_DIR/ns/_/lib/python$NS3_PYTHON_VERSION" || true
+
+for f in "$UNPACK_DIR"/ns/*.so; do
+    [ -f "$f" ] || continue
     patchelf --set-rpath '$ORIGIN/_/lib' "$f" || true
 done
 
-for f in "$ns3_patch"/ns/_/bin/*; do
+for f in "$UNPACK_DIR"/ns/_/bin/*; do
     [ -f "$f" ] || continue
     patchelf --set-rpath '$ORIGIN/../lib' "$f" || true
     chmod +x "$f" || true
 done
 
-for f in "$ns3_patch"/ns/_/lib/*.so*; do
+for f in "$UNPACK_DIR"/ns/_/lib/*.so*; do
     [ -f "$f" ] || continue
     patchelf --set-rpath '$ORIGIN' "$f" || true
 done
 
 run mkdir -p dist2
-run python3 -m wheel pack -d dist2 "$ns3_patch"
+run python3 -m wheel pack -d dist2 "$UNPACK_DIR"
 
 asset_path="$base/ns-$NS3_VERSION-py3-none-linux_x86_64.whl"
 run cp "dist2/ns-$NS3_VERSION-py3-none-any.whl" "$asset_path"
+
 
 section ---------------- asset ----------------
 asset "$asset_path"

@@ -97,9 +97,18 @@ run python3 -m wheel unpack -d /tmp/ns-wheel-unpack "dist/ns-$NS3_VERSION-py3-no
 
 run unpack_dir="/tmp/ns-wheel-unpack/ns-$NS3_VERSION" && mkdir -p "$unpack_dir/ns/_/lib" "$unpack_dir/ns/_/bin" || true
 
-run find /ns-3-build/usr/local/lib -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P {} "$unpack_dir/ns/_/lib/" \;
-run find /ns-3-build -type f -name '*.so*' -exec cp -P {} "$unpack_dir/ns/_/lib/" \;
-run find /ns-3-build/usr/local/bin -type f -exec cp {} "$unpack_dir/ns/_/bin/" \;
+if [ -d /ns-3-build/usr/local/lib ]; then
+  run find /ns-3-build/usr/local/lib -maxdepth 1 -type f \( -name 'libns3*' -o -name '*.so*' -o -name '*.so' \) -exec cp -P '{}' "$unpack_dir/ns/_/lib/" \; || true
+fi
+
+if [ -d /ns-3-build ]; then
+  run find /ns-3-build -type f -name '*.so*' -exec cp -P '{}' "$unpack_dir/ns/_/lib/" \; || true
+fi
+
+if [ -d /ns-3-build/usr/local/bin ]; then
+  run find /ns-3-build/usr/local/bin -type f -exec cp '{}' "$unpack_dir/ns/_/bin/" \; || true
+fi
+
 run rm -rf "$unpack_dir/ns/_/lib/python$NS3_PYTHON_VERSION" || true
 
 for f in "$unpack_dir"/ns/*.so; do

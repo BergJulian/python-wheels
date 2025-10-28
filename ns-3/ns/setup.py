@@ -43,7 +43,7 @@ setup(
     'Operating System :: Unix',
     'Programming Language :: C++',
   ],
-  install_requires=["cppyy>=3.1.2"],
+  install_requires=['cppyy>=3.5.0,<4'],
   cmdclass={
     'build': NS3Build,
     'install': NS3Install,
